@@ -1,7 +1,22 @@
 #!/bin/bash
 
-RULE_FILE_C="./regoleOneLine.c"
-RULE_FILE_PROLOG="./regoleOneLine.c"
+USAGE="$0 <INPUT FILE>"
+USAGE_MSG="THE PROLOG RULES WILL BE PRINTED ON THE STD OUTPUT"
+
+if [ -z "$1" ]
+then
+    echo "$USAGE"
+    echo "${USAGE_MSG}"
+    exit 1
+fi
+
+RULE_FILE_C="$1"
+# RULE_FILE_C="./regoleOneLine.c"
+#
+# THE PROLOG RULES WILL BE PRINTED ON THE STD OUTPUT
+# RULE_FILE_PROLOG="./regoleOneLine.c"
+#
+
 C_TYPES="float int char boolean double"
 NEGATION_PART_PREDICATE="do_not_hold_prev"
 
@@ -14,7 +29,8 @@ NOT_BACKSLASH="ç"
 NEGATION_PART=""
 
 
-FIRST_ROW=`grep "^const char \*ApplyRules(" ${RULE_FILE_C} | sed "s/ [ ]*/${NOT_BLANK}/g"`
+# FIRST_ROW=`grep "^const char \*ApplyRules(" ${RULE_FILE_C} | sed "s/ [ ]*/${NOT_BLANK}/g"`
+FIRST_ROW=`head -n 1 ${RULE_FILE_C} | sed "s/ [ ]*/${NOT_BLANK}/g"`
 # echo ${FIRST_ROW}
 VARIABLES=`echo ${FIRST_ROW} | sed "s/^[^(]*(\(.*[^)]\)).*{$/\1/g"`
 # echo ${VARIABLES}
