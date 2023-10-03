@@ -8,6 +8,7 @@ props :-
   time(check_prop('7a')),
   time(check_prop('7b')),
   time(check_prop(3)),
+  true.
   %%
   %time(check_prop(1)),
   %time(check_prop(2)),
