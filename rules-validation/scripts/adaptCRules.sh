@@ -19,9 +19,13 @@ VARIABLE_TO_CONVERT="Positive_arrivals_departures"
 VARIABLE_TYPE_SOURCE="int"
 VARIABLE_TYPE_TARGET="float"
 
+PROCEDURE_TYPE_AND_NAME_SOURCE="char \*ApplyRules"
+PROCEDURE_TYPE_AND_NAME_TARGET="int \*ApplyRules"
+
 # FIRST_ROW=`grep "^const char \*ApplyRules(" ${RULE_FILE_C} | sed "s/ [ ]*/${NOT_BLANK}/g"`
-FIRST_ROW=`head -n 1 ${RULE_FILE_C} | sed "s/ [ ]*/${NOT_BLANK}/g"`
+FIRST_ROW=`head -n 1 ${RULE_FILE_C} | sed "s/${PROCEDURE_TYPE_AND_NAME_SOURCE}/${PROCEDURE_TYPE_AND_NAME_TARGET}/"| sed "s/ [ ]*/${NOT_BLANK}/g"`
 # echo ${FIRST_ROW}
+
 MODIFIED_FIRST_ROW=`echo ${FIRST_ROW} | sed "s/${VARIABLE_TYPE_SOURCE}[${NOT_BLANK}]\+${VARIABLE_TO_CONVERT}/${VARIABLE_TYPE_TARGET}${NOT_BLANK}${VARIABLE_TO_CONVERT}/g"`
 MODIFIED_FIRST_ROW=`echo "${MODIFIED_FIRST_ROW}" | sed "s/${NOT_BLANK}/ /g" | sed "s/${NOT_BACKSLASH}/\\\\\/g"`    
 echo ${MODIFIED_FIRST_ROW}
@@ -30,7 +34,7 @@ echo ${MODIFIED_FIRST_ROW}
 # for LINE in `cat ${RULE_FILE_C} | sed "s/ [ ]*/${NOT_BLANK}/g" | sed "s/\\\\\/${NOT_BACKSLASH}/g"`
 for LINE in `tail -n +2 ${RULE_FILE_C} | sed "s/ [ ]*/${NOT_BLANK}/g" | sed "s/\\\\\/${NOT_BACKSLASH}/g"`
 do
-    LINE_WITH_UPDATED_RETURN=`echo "${LINE}" | sed "s/return${NOT_BLANK}\"Q\([1234]\)\"/return${NOT_BLANK}\"\1\"/g"`
+    LINE_WITH_UPDATED_RETURN=`echo "${LINE}" | sed "s/return${NOT_BLANK}\"Q\([1234]\)\"/return${NOT_BLANK}\1/g"`
     if [ -z "${LINE_WITH_UPDATED_RETURN}" ]
     then
         PROCESSED_LINE="${LINE}"
