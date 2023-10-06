@@ -14,6 +14,8 @@ RULE_FILE_C="$1"
 
 NOT_BLANK="§"
 NOT_BACKSLASH="ç"
+DIGIT_TAG_START="@--"
+DIGIT_TAG_END="--@"
 
 VARIABLE_TO_CONVERT="Positive_arrivals_departures"
 VARIABLE_TYPE_SOURCE="int"
@@ -41,12 +43,37 @@ do
     else
         PROCESSED_LINE="${LINE_WITH_UPDATED_RETURN}"
     fi
+        
+#     LINE_WITH_UPDATED_VARIABLE_VALUE=`echo "${PROCESSED_LINE}" | sed "s/\(${VARIABLE_TO_CONVERT}[^[:digit:]]*\)\([[:digit:]]\+\)/\10.\2/g"`
+    LINE_WITH_UPDATED_VARIABLE_VALUE=`echo "${PROCESSED_LINE}" | sed "s/\(${VARIABLE_TO_CONVERT}[^[:digit:]]*\)\([[:digit:]]\+\)/\1${DIGIT_TAG_START}\2${DIGIT_TAG_END}/g"`
+
+    LINE_WITH_TAGS=`echo "${PROCESSED_LINE}" | sed "s/\(${VARIABLE_TO_CONVERT}[^[:digit:]]*\)\([[:digit:]]\+\)/\1${DIGIT_TAG_START}\2${DIGIT_TAG_END}/g"`
     
-    LINE_WITH_UPDATED_VARIABLE_VALUE=`echo "${PROCESSED_LINE}" | sed "s/\(${VARIABLE_TO_CONVERT}[^[:digit:]]*\)\([[:digit:]]\+\)/\10.\2/g"`
-    if [ -z "${LINE_WITH_UPDATED_VARIABLE_VALUE}" ]
+    
+    if [[ -n "${LINE_WITH_UPDATED_VARIABLE_VALUE}" && -n "${PROCESSED_LINE}" && "${LINE_WITH_UPDATED_VARIABLE_VALUE}" != "${PROCESSED_LINE}" ]]
     then
-        PROCESSED_LINE="${LINE}"
-    else
+        
+        COUNTER_DIGIT_TO_UPDATE=`echo "${LINE_WITH_UPDATED_VARIABLE_VALUE}" | tr "${NOT_BLANK}" "\n" | grep -c "${DIGIT_TAG_START}[[:digit:]]\+${DIGIT_TAG_END}"`
+#         echo "COUNTER: $COUNTER_DIGIT_TO_UPDATE"
+#         echo "TAGS: $LINE_WITH_TAGS"
+
+        while [ "$COUNTER_DIGIT_TO_UPDATE" -ne "0" ]
+        do
+#             echo "Step"
+            
+## PAY ATTENTION HERE TO SED'S GREADY MATCHING STRATEGY            
+            DIGIT_TO_UPDATE=`echo "${LINE_WITH_UPDATED_VARIABLE_VALUE}" | sed "s/\(^.*${VARIABLE_TO_CONVERT}[^[:digit:]]*\)${DIGIT_TAG_START}\([[:digit:]]\+\)${DIGIT_TAG_END}.*$/\2/"`
+#           FOO=`echo "scale=5;${DIGIT_TO_UPDATE}/100" | bc`
+            DIGIT_TO_UPDATE=`echo "scale=5;${DIGIT_TO_UPDATE}/100" | bc | awk '{printf "%.5f\n", $0}'`
+#           echo "TEST: $DIGIT_TO_UPDATE -- $FOO"
+    
+#            LINE_WITH_UPDATED_VARIABLE_VALUE=`echo "${LINE_WITH_UPDATED_VARIABLE_VALUE}" | sed "s/${DIGIT_TAG_START}[[:digit:]]\+${DIGIT_TAG_END}/${DIGIT_TO_UPDATE}/"`
+## THIS REG EXP IN THE SED EXPRESSION AT THIS LINE MUST BE SO COMPLEX IN ORDER TO OVERCOME THE GREADY MATCHING STRATEGY. THE LINE ABOVE DOES NOT WORK AS (IN COMBINATION WITH THE LINE WHERE DIGIT_TO_UPDATE IS COMPUTED) IT ASSIGNS ALWAY THE RIGHT-MOST VALUE MATCHING 
+            LINE_WITH_UPDATED_VARIABLE_VALUE=`echo "${LINE_WITH_UPDATED_VARIABLE_VALUE}" | sed "s/\(^.*${VARIABLE_TO_CONVERT}[^[:digit:]]*\)${DIGIT_TAG_START}[[:digit:]]\+${DIGIT_TAG_END}\(.*\)$/\1${DIGIT_TO_UPDATE}\2/"`
+            
+            ((COUNTER_DIGIT_TO_UPDATE=COUNTER_DIGIT_TO_UPDATE-1))
+        done
+        
         PROCESSED_LINE="${LINE_WITH_UPDATED_VARIABLE_VALUE}"
     fi
     

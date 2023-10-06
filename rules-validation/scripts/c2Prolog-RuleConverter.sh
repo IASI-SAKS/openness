@@ -55,11 +55,14 @@ do
     RESULT_CONSTRAINT=`echo "${LINE}" | sed "s/^.*return${NOT_BLANK}/${NOT_BLANK}(${RESULT_VARIABLE}=/g" | sed "s/;/)/" | sed "s/<=/=</g" | sed "s/!=/=${NOT_BACKSLASH}=/g"`
 
     NEGATION_PART="${NEGATION_PART_PREDICATE}(${RULE_COUNTER},(${VARIABLES}))"
-## **********************************************************************
-## **********************************************************************    
-#     RULE_TAIL="Rule=${RULE_COUNTER},${NOT_BLANK}{${CLP_CONSTRAINTS}},${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}${RESULT_CONSTRAINT}." 
-## **********************************************************************
-    RULE_TAIL="{${CLP_CONSTRAINTS}},${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}${RESULT_CONSTRAINT}" 
+### **********************************************************************
+### **********************************************************************    
+##   RULE_TAIL="Rule=${RULE_COUNTER},${NOT_BLANK}{${CLP_CONSTRAINTS}},${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}${RESULT_CONSTRAINT}." 
+### **********************************************************************
+#    RULE_TAIL="{${CLP_CONSTRAINTS}},${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}${RESULT_CONSTRAINT}" 
+### **********************************************************************
+### **********************************************************************    
+    RULE_TAIL="in_constr(${CLP_CONSTRAINTS}),${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}out_constr(${RESULT_CONSTRAINT})" 
 ## **********************************************************************
 ## **********************************************************************    
     RULE_TAIL=`echo "${RULE_TAIL}" | sed "s/${NOT_BLANK}/ /g" | sed "s/${NOT_BACKSLASH}/\\\\\/g"`    
