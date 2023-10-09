@@ -62,7 +62,7 @@ do
 #    RULE_TAIL="{${CLP_CONSTRAINTS}},${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}${RESULT_CONSTRAINT}" 
 ### **********************************************************************
 ### **********************************************************************    
-    RULE_TAIL="in_constr(${CLP_CONSTRAINTS}),${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}out_constr(${RESULT_CONSTRAINT})" 
+    RULE_TAIL="in_constr((${CLP_CONSTRAINTS})),${NOT_BLANK}${NEGATION_PART},${NOT_BLANK}out_constr(${RESULT_CONSTRAINT})" 
 ## **********************************************************************
 ## **********************************************************************    
     RULE_TAIL=`echo "${RULE_TAIL}" | sed "s/${NOT_BLANK}/ /g" | sed "s/${NOT_BACKSLASH}/\\\\\/g"`    
