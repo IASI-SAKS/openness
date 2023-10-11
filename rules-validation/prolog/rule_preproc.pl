@@ -1,20 +1,22 @@
 :- module(rule_preproc,
-    [ pre_proc_rules/2, conj_to_list/2 ]).
+    [ pre_proc_rules/2 ]).
 
 :- use_module(library(clpr)).
 :- use_module(library(clpfd)).
+:- use_module(utils).
 
 pre_proc_rules(InFile,OutFile) :-
   abolish(holds/3),
   consult(InFile),
   constr_preproc,
-  VarNames=((A,B,C,D,E,F),[
+  VarNames=((A,B,C,D,E,F),G,[
     'Prob_Passenger_ignoring_shops'=A, 
     'Prob_Passenger_Respects_Safety_distance'=B, 
     'Safety_distance'=C, 
     'Low_arrivals'=D, 
     'High_arrivals'=E, 
-    'Positive_arrivals_departures'=F
+    'Positive_arrivals_departures'=F,
+    'O'=G
   ]),
   tell(OutFile),
   print_holds(VarNames),
@@ -22,17 +24,17 @@ pre_proc_rules(InFile,OutFile) :-
   told.
 %
 print_holds(VarNames) :-
-  VarNames = (X,L),
-  clause(holds___PP(N,X,C),Body),
-  portray_clause(current_output,(holds(N,X,C):-Body),[variable_names(L)]),
+  VarNames = (X,O,L),
+  clause(holds___PP(N,X,O),Body),
+  portray_clause(current_output,(holds(N,X,O):-Body),[variable_names(L)]),
   fail.
 print_holds(VarNames) :-
-  VarNames = (X,L),
-  clause(holds___PP(default,X,C),Body),
-  portray_clause(current_output,(holds(default,X,C):-Body),[variable_names(L)]).  
+  VarNames = (X,O,L),
+  clause(holds___PP(default,X,O),Body),
+  portray_clause(current_output,(holds(default,X,O):-Body),[variable_names(L)]).  
 %
 print_do_not_hold_prev(VarNames) :-
-  VarNames = (X,L),
+  VarNames = (X,_,L),
   clause(do_not_hold_prev___PP(N,X),Body),
   portray_clause(current_output,(pp___do_not_hold_prev(N,X):-Body),[variable_names(L)]),
   fail.
@@ -122,26 +124,6 @@ convert_to_clpFD(X>=Y,X#>=Y).
 convert_to_clpFD(X=<Y,X#=<Y).
 convert_to_clpFD(X=Y,X#=Y).
 convert_to_clpFD(X=\=Y,X#\=Y).
-
-% MODE: conj_to_list(+S,-L)
-% S a conjunction of the form (A1,...,An), 
-% and L is the list [A1,...,An].
-conj_to_list(X,[]) :-
-  X==true,
-  !.
-conj_to_list(B,L) :-
-  ( nonvar(B), functor(B,',',_) ->
-    ( B = (B1,B2), L=[B1|H], conj_to_list(B2,H) )
-  ;
-    L=[B]
-  ).
-
-% MODE: list_to_conj(+Lst, -Conj)
-% SEMANTICS: generate the conjuntion (term1,...,termN)
-% from a nonempty list of terms [term1,...,termN]
-list_to_conj([H], H) :- !.
-list_to_conj([H|T], ','(H, Conj)) :-
-  list_to_conj(T, Conj).  
 
 % constr_holds/3
 constr_holds(CLPQR,CLPFD, true) :- 

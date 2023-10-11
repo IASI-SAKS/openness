@@ -3,9 +3,12 @@
 :- use_module(library(clpfd)).
 :- use_module(library(dialect/hprolog),
     [ memberchk_eq/2 ]).
+:- use_module(utils).
 
 :- dynamic domains/6.
 
+% types of input variables
+% assumption: output is a FD variable
 vartypes((
     Prob_Passenger_ignoring_shops, 
     Prob_Passenger_Respects_Safety_distance, 
