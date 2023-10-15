@@ -6,6 +6,7 @@
 :- use_module(utils).
 
 :- dynamic domains/6.
+:- dynamic vv_opt/1.
 
 % types of input variables
 % assumption: output is a FD variable
@@ -61,7 +62,7 @@ check_prop(P) :-
   atom_concat(neg_prop,P,NegProp),
   write(P),
   ( current_predicate(NegProp/6) ->
-    ( NegPropAtom =.. [NegProp,R1,I1,O1,R2,I2,O2], 
+    ( NegPropAtom =.. [NegProp,R1,I1,O1,R2,I2,O2],
       NegPropAtom,
       write(' does not hold: '), nl,
       show_res(R1,I1,O1,R2,I2,O2)
@@ -77,6 +78,7 @@ check_prop(_) :-
 %
 set_domains(X) :-
   member(X,[none,data,extd]),
+  assert(vv_opt(domain(X))),
   retractall(domains(_,_,_,_,_,_)),
   assert((domains(V1,V2,V3,V4,V5,V6) :- domains(X,V1,V2,V3,V4,V5,V6))).
 
@@ -116,7 +118,8 @@ neg_prop1(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures    
   ),
   holds(R1,I1,O1), 
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 %% negation of prop2 ----------------------------------------------------------
 neg_prop2(R1,I1,O1,R2,I2,O2) :-
   I1 = (
@@ -154,7 +157,8 @@ neg_prop2(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures
   ),
   holds(R1,I1,O1),
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 %% negation of prop3 ----------------------------------------------------------
 neg_prop3(R1,I1,O1,R2,I2,O2) :- 
   I1 = (
@@ -192,7 +196,8 @@ neg_prop3(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures
   ),
   holds(R1,I1,O1),
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 %% negation of prop4 ----------------------------------------------------------
 neg_prop4(R1,I1,O1,R2,I2,O2) :-
   I1 = (
@@ -230,7 +235,8 @@ neg_prop4(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures
   ),
   holds(R1,I1,O1),
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 %% negation of prop5 ----------------------------------------------------------
 neg_prop5(R1,I1,O1,R2,I2,O2) :-
   I1 = (
@@ -268,7 +274,8 @@ neg_prop5(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures
   ),
   holds(R1,I1,O1),
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 %% negation of prop6 ----------------------------------------------------------
 neg_prop6(R1,I1,O1,R2,I2,O2) :-
   I1 = (
@@ -306,7 +313,8 @@ neg_prop6(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures2
   ),
   holds(R1,I1,O1),
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 %% negation of prop7a ----------------------------------------------------------
 neg_prop7a(R1,I1,O1,R2,I2,O2) :-
   I1 = (
@@ -347,7 +355,8 @@ neg_prop7a(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures2
   ),
   holds(R1,I1,O1),
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 %% negation of prop7b ----------------------------------------------------------
 neg_prop7b(R1,I1,O1,R2,I2,O2) :-
   I1 = (
@@ -388,7 +397,8 @@ neg_prop7b(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures2
   ),
   holds(R1,I1,O1),
-  holds(R2,I2,O2).
+  holds(R2,I2,O2),
+  is_concrete(I1,I2).
 
 % -----------------------------------------------------------------------------
 % no bounds
@@ -501,3 +511,32 @@ get_dump_vars([X|Xs],[N|Ns], [N=X|Es],Rs) :-
   get_dump_vars(Xs,Ns, Es,Rs).
 get_dump_vars([X|Xs],[_|Ns], Es,[X|Rs]) :-
   get_dump_vars(Xs,Ns, Es,Rs).
+
+%
+is_concrete(I1,I2) :-
+  vv_opt(domain(X)),
+  % The domain of the variables must be finite.
+  member(X,[data,extd]),
+  !,
+  copy_term((I1,I2),(CpyI1,CpyI2)),
+  CpyI1 = (
+    _Prob_Passenger_ignoring_shops1, 
+    _Prob_Passenger_Respects_Safety_distance1,%%
+    _Safety_distance1,                                                
+    Low_arrivals1, 
+    High_arrivals1, 
+    _Positive_arrivals_departures1            %% 
+  ),
+  CpyI2 = (
+    _Prob_Passenger_ignoring_shops2, 
+    _Prob_Passenger_Respects_Safety_distance2,%% 
+    _Safety_distance2,                                               
+    Low_arrivals2, 
+    High_arrivals2, 
+    _Positive_arrivals_departures2            %%
+  ),
+  % Bind Low/High_arrivals to a feasible value of their domains.
+  indomain(Low_arrivals1), indomain(High_arrivals1),
+  indomain(Low_arrivals2), indomain(High_arrivals2).
+is_concrete(_I1,_I2) :-
+  vv_opt(domain(none)).
