@@ -19,6 +19,7 @@ pre_proc_rules(InFile,OutFile) :-
     'O'=G
   ]),
   tell(OutFile),
+  write(':- style_check(-singleton).'), nl, nl,
   print_holds(VarNames),
   print_do_not_hold_prev(VarNames),
   told.
