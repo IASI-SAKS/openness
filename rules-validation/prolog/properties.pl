@@ -28,6 +28,7 @@ vartypes((
 
 props :-
   set_domains(none),
+  write('%%% domain: none'), nl, nl,
   time(check_prop(1)),
   time(check_prop(2)),
   time(check_prop(3)),
@@ -38,6 +39,7 @@ props :-
   time(check_prop('7b')),
   %%
   set_domains(data),
+  nl, write('%%% domain: data'), nl, nl,
   time(check_prop(1)),
   time(check_prop(2)),
   time(check_prop(3)),
@@ -48,6 +50,7 @@ props :-
   time(check_prop('7b')),
   %%
   set_domains(extd),
+  nl, write('%%% domain: extd'), nl, nl,
   time(check_prop(1)),
   time(check_prop(2)),
   time(check_prop(3)),
@@ -60,12 +63,12 @@ props :-
 %
 check_prop(P) :-
   atom_concat(neg_prop,P,NegProp),
-  write(P),
+  write('% '), write(P),
   ( current_predicate(NegProp/6) ->
     ( NegPropAtom =.. [NegProp,R1,I1,O1,R2,I2,O2],
       NegPropAtom,
-      write(' does not hold: '), nl,
-      show_res(R1,I1,O1,R2,I2,O2)
+      write(' does not hold: '),
+      show_res(P,R1,I1,O1,R2,I2,O2)
     )
   ;
     write(' does not exist.')
@@ -446,33 +449,18 @@ domains(extd,
   12 #=< High_arrivals, High_arrivals #=< 30.
 
 %%% utility predicates
-show_res(R1,I1,O1,R2,I2,O2) :-
-  I1 = (
-    Prob_Passenger_ignoring_shops1, 
-    Prob_Passenger_Respects_Safety_distance1, 
-    Safety_distance1, 
-    Low_arrivals1,
-    High_arrivals1,
-    Positive_arrivals_departures1
-  ),
-  I2 = (
-    Prob_Passenger_ignoring_shops2, 
-    Prob_Passenger_Respects_Safety_distance2, 
-    Safety_distance2, 
-    Low_arrivals2,
-    High_arrivals2,
-    Positive_arrivals_departures2
-  ),
+show_res(P,R1,I1,O1,R2,I2,O2) :-
   conj_to_list(I1,L1), conj_to_list(I2,L2),
-  append([O1|L1],[O2|L2],I),
-  get_dump_vars(I,[
+  get_dump_vars([O1|L1],[
     'O1',
     'Prob_Passenger_ignoring_shops1', 
     'Prob_Passenger_Respects_Safety_distance1',
     'Safety_distance1',
     'Low_arrivals1',
     'High_arrivals1',
-    'Positive_arrivals_departures1',
+    'Positive_arrivals_departures1'],
+    Eqs1,Ns1,[V1|Vs1]),
+  get_dump_vars([O2|L2],[
     'O2',
     'Prob_Passenger_ignoring_shops2', 
     'Prob_Passenger_Respects_Safety_distance2',
@@ -480,37 +468,25 @@ show_res(R1,I1,O1,R2,I2,O2) :-
     'Low_arrivals2',
     'High_arrivals2',
     'Positive_arrivals_departures2'],
-    Eqs,Vs),
+    Eqs2,Ns2,[V2|Vs2]),
+  append([V1|Vs1],[V2|Vs2],Vs),
   copy_term(Vs,Vs,C1),
   write(R1-R2), nl,
+  append(Eqs1,Eqs2,Eqs),
   append(C1,Eqs,C2),
-  write_term(C2,[
-    variable_names([
-      'O1'=O1,
-      'Prob_Passenger_ignoring_shops1'=Prob_Passenger_ignoring_shops1, 
-      'Prob_Passenger_Respects_Safety_distance1'=Prob_Passenger_Respects_Safety_distance1,
-      'Safety_distance1'=Safety_distance1,
-      'Low_arrivals1'=Low_arrivals1,
-      'High_arrivals1'=High_arrivals1,
-      'Positive_arrivals_departures1'=Positive_arrivals_departures1,
-      'O2'=O2,
-      'Prob_Passenger_ignoring_shops2'=Prob_Passenger_ignoring_shops2, 
-      'Prob_Passenger_Respects_Safety_distance2'=Prob_Passenger_Respects_Safety_distance2,
-      'Safety_distance2'=Safety_distance2,
-      'Low_arrivals2'=Low_arrivals2,
-      'High_arrivals2'=High_arrivals2,
-      'Positive_arrivals_departures2'=Positive_arrivals_departures2
-    ])
-  ]).
+  vv_opt(domain(X)),
+  append(Ns1,Ns2,Ns),
+  write_term(ans(P-X,Vs1,V1,Vs2,V2,C2),[variable_names(Ns),quoted(true)]),
+  write('.').
 
 %
-get_dump_vars([],[], [],[]).
-get_dump_vars([X|Xs],[N|Ns], [N=X|Es],Rs) :-
+get_dump_vars([],[], [],[],[]).
+get_dump_vars([X|Xs],[N|Ns], [V=X|Es],[N=V|VNs],[V|Rs]) :- % V is a fresh new variable
   ground(X),
   !,
-  get_dump_vars(Xs,Ns, Es,Rs).
-get_dump_vars([X|Xs],[_|Ns], Es,[X|Rs]) :-
-  get_dump_vars(Xs,Ns, Es,Rs).
+  get_dump_vars(Xs,Ns, Es,VNs,Rs).
+get_dump_vars([X|Xs],[N|Ns], Es,[N=X|VNs],[X|Rs]) :-
+  get_dump_vars(Xs,Ns, Es,VNs,Rs).
 
 %
 is_concrete(I1,I2) :-
