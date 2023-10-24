@@ -178,7 +178,7 @@ neg_prop3(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures
   ),
   { Prob_Passenger_ignoring_shops1 < Prob_Passenger_ignoring_shops2 },                
-  24*Low_arrivals1 + 19* High_arrivals1 #> 24*Low_arrivals2 + 19* High_arrivals2, O1#>O2,
+  24*Low_arrivals1 + 20*High_arrivals1 #> 24*Low_arrivals2 + 20*High_arrivals2, O1#>O2,
   domains(
     Prob_Passenger_ignoring_shops1,
     Prob_Passenger_Respects_Safety_distance, 
