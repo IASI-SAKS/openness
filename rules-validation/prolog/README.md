@@ -1,9 +1,46 @@
-### Pre-processing holds (swipl):
+### Generating the CLP encoding
 
-`consult(properties), consult(rule_preproc).`
+Let `MODEL.c` be file that contains the definition of `ApplyRules`; its  CLP encoding can be obtained by executing
+the following commands (details can be found in Deliverable D5.3).
 
-`pre_proc_rules('Simulator_V18_Q4_rules_20230908_182047-nomiVariabiliCorretti-tipiVariabiliCorretti.pl','Simulator_V18_Q4_rules_20230908_182047-nomiVariabiliCorretti-tipiVariabiliCorretti_PP.pl').`
+By executing the command:
 
-### Checking properties (bash):
+```bash
+rulesrules-validation/scipts$ ./encode.sh SOURCE.c pl
+```
 
-`nohup swipl -g "consult(holds_interpreter), consult(properties), consult('Simulator_V18_Q4_rules_20230908_182047-nomiVariabiliCorretti-tipiVariabiliCorretti_PP.pl'),props,halt" &`
+we get the file  `SOURCE.pl` that containts the intermediate Prolog encoding of `ApplyRules`.
+
+By executing the command:
+
+```bash
+rules-validation/scipts$ ./encode.sh SOURCE.pl clp
+```
+
+we get the file  `SOURCE.clp` that containts the final CLP encodig of `ApplyRules`.
+
+### Checking the properties
+
+[SWI-Prolog](https://www.swi-prolog.org/) can be started by executing the following command:
+
+```bash
+rules-validation/prolog$ swipl
+```
+
+The SWI-Prolog environment is now ready to execute queries; we can load the V&V modules by executing the following queries:
+
+```prolog
+?- consult(properties).
+
+true.
+
+?- consult('SOURCE.clp').
+
+true.
+```
+
+To check Property P included in `properties.pl` we can execute the query 
+
+```prolog
+?- check_prop(2).
+```

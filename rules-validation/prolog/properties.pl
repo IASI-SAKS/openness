@@ -5,27 +5,14 @@
     [ memberchk_eq/2 ]).
 :- use_module(utils).
 
-:- dynamic domains/6.
 :- dynamic vv_opt/1.
 
-% types of input variables
-% assumption: output is a FD variable
-vartypes((
-    Prob_Passenger_ignoring_shops, 
-    Prob_Passenger_Respects_Safety_distance, 
-    Safety_distance,
-    Low_arrivals, 
-    High_arrivals, 
-    Positive_arrivals_departures
-  ),[
-  var(Prob_Passenger_ignoring_shops,clpQR),
-  var(Prob_Passenger_Respects_Safety_distance,clpQR),
-  var(Safety_distance,clpQR),
-  var(Low_arrivals,clpFD),
-  var(High_arrivals,clpFD),
-  var(Positive_arrivals_departures,clpQR)
-]).
+% load definition of vartypes/2
+:- consult(vartypes).
+% default domains
+:- initialization(set_domains(none)).
 
+% check all properties
 props :-
   set_domains(none),
   write('%%% domain: none'), nl, nl,
@@ -103,7 +90,8 @@ neg_prop1(R1,I1,O1,R2,I2,O2) :-
     High_arrivals2,                         %%
     Positive_arrivals_departures
   ),
-  24*Low_arrivals1 + 20*High_arrivals1 #< 24*Low_arrivals2 + 20*High_arrivals2, O1#>O2,
+  24*Low_arrivals1 + 20*High_arrivals1 #< 24*Low_arrivals2 + 20*High_arrivals2,
+  O1#>O2,
   domains(
     Prob_Passenger_ignoring_shops,
     Prob_Passenger_Respects_Safety_distance,
@@ -181,7 +169,8 @@ neg_prop3(R1,I1,O1,R2,I2,O2) :-
     Positive_arrivals_departures
   ),
   { Prob_Passenger_ignoring_shops1 < Prob_Passenger_ignoring_shops2 },                
-  24*Low_arrivals1 + 20*High_arrivals1 #> 24*Low_arrivals2 + 20*High_arrivals2, O1#>O2,
+  24*Low_arrivals1 + 20*High_arrivals1 #> 24*Low_arrivals2 + 20*High_arrivals2, 
+  O1#<O2,
   domains(
     Prob_Passenger_ignoring_shops1,
     Prob_Passenger_Respects_Safety_distance, 

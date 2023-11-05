@@ -1,9 +1,8 @@
-:- module(rule_preproc,
-    [ pre_proc_rules/2 ]).
-
 :- use_module(library(clpr)).
 :- use_module(library(clpfd)).
 :- use_module(utils).
+
+:- consult(vartypes).
 
 pre_proc_rules(InFile,OutFile) :-
   abolish(holds/3),
@@ -20,7 +19,7 @@ pre_proc_rules(InFile,OutFile) :-
   ]),
   tell(OutFile),
   write(':- style_check(-singleton).'), nl, nl,
-  print_holds(VarNames),
+  print_holds(VarNames), nl,
   print_do_not_hold_prev(VarNames),
   told.
 %
@@ -29,10 +28,7 @@ print_holds(VarNames) :-
   clause(holds___PP(N,X,O),Body),
   portray_clause(current_output,(holds(N,X,O):-Body),[variable_names(L)]),
   fail.
-print_holds(VarNames) :-
-  VarNames = (X,O,L),
-  clause(holds___PP(default,X,O),Body),
-  portray_clause(current_output,(holds(default,X,O):-Body),[variable_names(L)]).  
+print_holds(_).  
 %
 print_do_not_hold_prev(VarNames) :-
   VarNames = (X,_,L),
@@ -64,11 +60,14 @@ constr_preproc_aux(R) :-
   !,
   R1 is R+1,
   constr_preproc_aux(R1).
-constr_preproc_aux(_) :-
+constr_preproc_aux(R) :-
   % retrieve holds clause
   clause(holds(default,X,Q),Body),
   % pre-process holds/3
-  assert((holds___PP(default,X,Q) :- Body)).
+  conj_to_list(Body,[do_not_hold_prev(default,I),V]),
+  convert_to_clpFD(V,R1), % output constraint
+  list_to_conj([do_not_hold_prev(R,I),R1],NewBody),
+  assert((holds___PP(R,X,Q) :- NewBody)).
 
 %
 pre_proc_holds(R,X,Q,CLPQR,CLPFD,BodyLst) :-
