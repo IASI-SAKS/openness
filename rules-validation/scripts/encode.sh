@@ -18,8 +18,8 @@ fi
 
 case $2 in
   "pl")
-    ./adaptCRules.sh $1 > "${1%.c}__mod.c"
-    ./c2Prolog-RuleConverter.sh "${1%.c}__mod.c" > "${1%.c}.pl"
+    ./adaptCRules.sh $1 > "${1%.c}-tipiVariabiliCorretti.c"
+    ./c2Prolog-RuleConverter.sh "${1%.c}-tipiVariabiliCorretti.c" > "${1%.c}-tipiVariabiliCorretti.pl"
   ;;
   "clp")
     FileOut="${1%.pl}.clp"

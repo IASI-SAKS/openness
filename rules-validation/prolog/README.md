@@ -30,7 +30,7 @@ rules-validation/prolog$ swipl
 The SWI-Prolog environment is now ready to execute queries; we can load the V&V modules by executing the following queries:
 
 ```prolog
-?- consult(properties).
+?- consult(domain_properties).
 
 true.
 
