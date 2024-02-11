@@ -47,7 +47,7 @@ props :-
   time(check_prop('7a')),
   time(check_prop('7b')).
 
-%
+%%
 check_prop(P) :-
   atom_concat(neg_prop,P,NegProp),
   write('% '), write(P),
@@ -65,9 +65,73 @@ check_prop(_) :-
   write(' holds.'),
   nl. 
 
+% -----------------------------------------------------------------------------
+props(N) :-
+  assert(count(1)),
+  set_domains(none),
+  write('%%% domain: none'), nl, nl,
+  check_prop(1,N),
+  check_prop(2,N),
+  check_prop(3,N),
+  check_prop(4,N),
+  check_prop(5,N),
+  check_prop(6,N),
+  check_prop('7a',N),
+  check_prop('7b',N),
+  %%
+  set_domains(data),
+  nl, write('%%% domain: data'), nl, nl,
+  check_prop(1,N),
+  check_prop(2,N),
+  check_prop(3,N),
+  check_prop(4,N),
+  check_prop(5,N),
+  check_prop(6,N),
+  check_prop('7a',N),
+  check_prop('7b',N),
+  %%
+  set_domains(extd),
+  nl, write('%%% domain: extd'), nl, nl,
+  check_prop(1,N),
+  check_prop(2,N),
+  check_prop(3,N),
+  check_prop(4,N),
+  check_prop(5,N),
+  check_prop(6,N),
+  check_prop('7a',N),
+  check_prop('7b',N).
+
+%%
+check_prop(P,N) :-
+  atom_concat(neg_prop,P,NegProp),
+  ( current_predicate(NegProp/6) ->
+    ( NegPropAtom =.. [NegProp,R1,I1,O1,R2,I2,O2],    
+      time(NegPropAtom),
+      write('% '), write(P), write(' does not hold (answer no. '), count(C), write(C), write(') '),
+      show_res(P,R1,I1,O1,R2,I2,O2),
+      nl,
+      C1 is C+1,
+      retractall(count(_)),
+      ( C1 =< N ->
+        ( assert(count(C1)), fail )
+      ;
+        ( assert(count(1)), write('% '), write(C), write(' answers found.'), ! )
+      )
+    )
+  ;
+    write(' does not exist.')
+  ),
+  nl.
+check_prop(_,N) :-
+  write('% '), count(C), C1 is C-1, write(C1), write(' out of '), write(N), write(' answers found.'), nl,
+  retractall(count(_)), 
+  assert(count(1)).
+
 %
 set_domains(X) :-
   member(X,[none,data,extd]),
+  !,
+  retractall(vv_opt(domain(_))),
   assert(vv_opt(domain(X))),
   retractall(domains(_,_,_,_,_,_)),
   assert((domains(V1,V2,V3,V4,V5,V6) :- domains(X,V1,V2,V3,V4,V5,V6))).
@@ -466,7 +530,8 @@ show_res(P,R1,I1,O1,R2,I2,O2) :-
   vv_opt(domain(X)),
   append(Ns1,Ns2,Ns),
   write_term(ans(P-X,Vs1,V1,Vs2,V2,C2),[variable_names(Ns),quoted(true)]),
-  write('.').
+  write('.'),
+  !.
 
 %
 get_dump_vars([],[], [],[],[]).
@@ -481,8 +546,7 @@ get_dump_vars([X|Xs],[N|Ns], Es,[N=X|VNs],[X|Rs]) :-
 is_concrete(I1,I2) :-
   vv_opt(domain(X)),
   % The domain of the variables must be finite.
-  member(X,[data,extd]),
-  !,
+  memberchk(X,[data,extd]),
   copy_term((I1,I2),(CpyI1,CpyI2)),
   CpyI1 = (
     _Prob_Passenger_ignoring_shops1, 
@@ -502,6 +566,7 @@ is_concrete(I1,I2) :-
   ),
   % Bind Low/High_arrivals to a feasible value of their domains.
   indomain(Low_arrivals1), indomain(High_arrivals1),
-  indomain(Low_arrivals2), indomain(High_arrivals2).
+  indomain(Low_arrivals2), indomain(High_arrivals2), 
+  !.
 is_concrete(_I1,_I2) :-
   vv_opt(domain(none)).
