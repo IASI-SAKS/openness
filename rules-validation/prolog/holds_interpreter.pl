@@ -19,7 +19,8 @@ holds(I,O) :- holds(_,I,O).
 % for pre-processed rules
 % (R for the default rule is set to MaxR+1 during pre-processing)
 do_not_hold_prev(R,I) :-
-  do_not_hold_prev(1,R,I).
+  do_not_hold_prev(1,R,I),
+  !.
 
 % do_not_hold_prev/3
 do_not_hold_prev(N,N,_).

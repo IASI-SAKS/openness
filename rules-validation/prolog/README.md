@@ -9,7 +9,7 @@ By executing the command:
 rulesrules-validation/scipts$ ./encode.sh SOURCE.c pl
 ```
 
-we get the file  `SOURCE.pl` that containts the intermediate Prolog encoding of `ApplyRules`.
+we get the file  `SOURCE.pl` that contains the intermediate Prolog encoding of `ApplyRules`.
 
 By executing the command:
 
@@ -17,7 +17,7 @@ By executing the command:
 rules-validation/scipts$ ./encode.sh SOURCE.pl clp
 ```
 
-we get the file  `SOURCE.clp` that containts the final CLP encodig of `ApplyRules`.
+we get the file  `SOURCE.clp` that contains the final CLP encodig of `ApplyRules`.
 
 ### Checking the properties
 
